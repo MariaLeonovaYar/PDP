@@ -1,8 +1,9 @@
 ﻿#include <cmath>
 #include <iostream>
-
 #include <cuda.h>
 #include <cuda_runtime_api.h>
+
+using namespace std;
 
 __global__ void calculateK(float* k1, float* k2, float* k3, float* k4, float a, float b, float xn, float yn, float h, int i) {
     k1[i] = h * cos(a * xn) - b * yn;
@@ -58,6 +59,12 @@ int main() {
         cudaMemcpy(c_k4, k4, m * sizeof(float), cudaMemcpyDeviceToHost);
         cudaMemcpy(c_yn, yn, m * sizeof(float), cudaMemcpyDeviceToHost);
 
+        for (int i = 0; i < finish; i++) {
+           cout << yn[i] << " ";
+        }
+
+        cout << "\n";
+
         xn += h;
     }
 
@@ -72,6 +79,7 @@ int main() {
     cudaFree(c_k3);
     cudaFree(c_k4);
     cudaFree(c_yn);
+
 
     return 0;
 }
