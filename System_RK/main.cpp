@@ -5,35 +5,36 @@
 
 using namespace std;
 
-double f(double x, double y, double z){
+float f(float x, float y, float z){
     return cos(3*x) - 4*y;
 }
 
-double g(double x, double y, double z){
+float g(float x, float y, float z){
     return z;
 }
 
 int main(){
-    int n = 100000, x0 = 0, y0=1, z0=1, xn, yn, zn;
-    double h = 0.00002;
+    int n = 100000, x0 = 0, y0=0.8, z0=2, xn, yn, zn;
+    float h = 0.00002;
 
-    double *k1, *k2, *k3, *k4;
-    double *l1, *l2, *l3, *l4;
-    double *x, *y, *z;
+    float *k1, *k2, *k3, *k4;
+    float *l1, *l2, *l3, *l4;
 
-    k1 = (double*) malloc(n * sizeof (double));
-    k2 = (double*) malloc(n * sizeof (double));
-    k3 = (double*) malloc(n * sizeof (double));
-    k4 = (double*) malloc(n * sizeof (double));
+    float *x, *y, *z;
 
-    l1 = (double*) malloc(n * sizeof (double));
-    l2 = (double*) malloc(n * sizeof (double));
-    l3 = (double*) malloc(n * sizeof (double));
-    l4 = (double*) malloc(n * sizeof (double));
+    k1 = (float*) malloc(n * sizeof (float));
+    k2 = (float*) malloc(n * sizeof (float));
+    k3 = (float*) malloc(n * sizeof (float));
+    k4 = (float*) malloc(n * sizeof (float));
 
-    x = (double*) malloc(n * sizeof (double));
-    y = (double*) malloc(n * sizeof (double));
-    z = (double*) malloc(n * sizeof (double));
+    l1 = (float*) malloc(n * sizeof (float));
+    l2 = (float*) malloc(n * sizeof (float));
+    l3 = (float*) malloc(n * sizeof (float));
+    l4 = (float*) malloc(n * sizeof (float));
+
+    x = (float*) malloc(n * sizeof (float));
+    y = (float*) malloc(n * sizeof (float));
+    z = (float*) malloc(n * sizeof (float));
 
     ofstream fout("point.txt");
 
@@ -41,24 +42,24 @@ int main(){
     y[0] = y0;
     z[0] = z0;
 
-    cout << "\t" << "X" << "\t\t" << "Y" << "\t\t" << "Z\n";
+    cout << "\t" << "X" << "\t\t" << "Y" << "\n";
 
     #pragma omp parallel num_threads(5)
     {
         #pragma omp for
             for (int i = 0; i < n; i++) {
 
-                k1[i] = h * f(x[i], y[i], z[i]);
-                l1[i] = h * g(x[i], y[i], z[i]);
+                l1[i] = g(0, 0, z[i]);
+                k1[i] = f(x[i], y[i], z[i]);
 
-                k2[i] = h * f(x[i] + h / 2.0, y[i] + k1[i] / 2.0, z[i] + l1[i] / 2.0);
-                l2[i] = h * g(x[i] + h / 2.0, y[i] + k1[i] / 2.0, z[i] + l1[i] / 2.0);
+                l2[i] = g(0, 0, z[i] + (k1[i] * h / 2.0));
+                k2[i] = f(x[i] + h / 2.0, y[i] + (l1[i] * h / 2.0), z[i] + (k1[i] * h / 2.0));
 
-                k3[i] = h * f(x[i] + h / 2.0, y[i] + k2[i] / 2.0, z[i] + l2[i] / 2.0);
-                l3[i] = h * g(x[i] + h / 2.0, y[i] + k2[i] / 2.0, z[i] + l2[i] / 2.0);
+                l3[i] = g(0, 0, z[i] + (k2[i] * h / 2.0));
+                k3[i] = f(x[i] + h / 2.0, y[i] + (l2[i] * h / 2.0), z[i] + (k2[i] * h / 2.0));
 
-                k4[i] = h * f(x[i] + h, y[i] + k3[i], z[i] + l3[i]);
-                l4[i] = h * g(x[i] + h, y[i] + k3[i], z[i] + l3[i]);
+                l4[i] = g(0, 0, z[i] + k3[i] * h);
+                k4[i] = f(x[i] + h, y[i] + l3[i] * h, z[i] + k3[i] * h);
 
                 x[i + 1] = x[i] + h;
                 y[i + 1] = y[i] + (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i]) / 6.0;
@@ -72,11 +73,12 @@ int main(){
     for (int i = 0; i < n; i++){
         fout << y[i] << " ";
     }
+
     fout << "\n";
-    for (int i = 0; i < n; i++){
+
+    for (int i = 0; i < n; i++) {
         fout << z[i] << " ";
     }
-    fout << "\n";
 
     fout.close();
 
