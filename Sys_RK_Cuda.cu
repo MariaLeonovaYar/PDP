@@ -44,9 +44,6 @@ int main() {
         cudaMalloc((void**)&c_k4, m * sizeof(float));
         cudaMalloc((void**)&c_yn, m * sizeof(float));
 
-        calculateK << <1, 5 >> > (d_k1, d_k2, d_k3, d_k4, xn, y0, h, i);
-        calculateRez << <1, 5 >> > (d_yn, d_k1, d_k2, d_k3, d_k4, h, i);
-
         cudaMemcpy(c_k1, k1, m * sizeof(float), cudaMemcpyDeviceToHost);
         cudaMemcpy(c_k2, k2, m * sizeof(float), cudaMemcpyDeviceToHost);
         cudaMemcpy(c_k3, k3, m * sizeof(float), cudaMemcpyDeviceToHost);
